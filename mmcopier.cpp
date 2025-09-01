@@ -1,19 +1,14 @@
 #include <string>
 #include <stdexcept>
 #include <iostream>
-#include <filesystem>
 #include <pthread.h>
 #include <vector>
 #include <cstdlib>
+#include "file_utils.h"
 
 const int TOTAL_ARG_COUNT = 4;
 const std::string SOURCE_FILE_TYPE = ".txt";
 const std::string SOURCE_FILE_PREFIX = "source";
-
-enum dir_type_t {
-    SOURCE,
-    DESTINATION
-};
 
 struct directory_pair_t {
     std::string source_filename;
@@ -29,24 +24,6 @@ int is_valid_thread_count(const std::string& thread_count_raw){
         return (thread_count >= 2 && thread_count <= 10) ? thread_count : -1;
     } catch (const std::exception& e){
         return -1;
-    }
-}
-
-bool directory_exists(std::string dir){
-    if (std::filesystem::exists(dir) && std::filesystem::is_directory(dir)){
-        return true;
-    } else {
-        std::cerr << "Directory does not exist: " << dir << std::endl;
-        return false;
-    }
-}
-
-bool file_exists(std::string file_path){
-    if (std::filesystem::exists(file_path) && std::filesystem::is_regular_file(file_path)){
-        return true;
-    } else {
-        std::cerr << "File does not exist: " << file_path << std::endl;
-        return false;
     }
 }
 
@@ -78,7 +55,6 @@ void* copy_file(void* directory_pair){
     if (!file_exists(source_filename)) {
         return nullptr;
     }
-    
     try {
         std::filesystem::copy(source_filename, destination_filename);
     } catch (const std::exception& e){
