@@ -1,7 +1,13 @@
-#include <iostream>
 #include <string>
 #include <stdexcept>
 #include <string>
+#include <iostream>
+#include <fstream> 
+#include <filesystem>
+#include <pthread>
+
+const int TOTAL_ARG_COUNT = 4
+const int FILE_ARGS = 2
 
 int is_valid_thread_count(const std::string& thread_count_raw){
     if (thread_count_raw.size() > 2){
@@ -16,13 +22,21 @@ int is_valid_thread_count(const std::string& thread_count_raw){
 }
 
 int main(int argc, char* argv[]){
-     if (argc != 4){
+    // validate correct argument count including function call
+     if (argc != REQUIRED_ARG_COUNT){
         std::cerr << "Usage: " << argv[0] 
                   << " <thread_count> <source_dir> <destination_dir>" << std::endl;
         return EXIT_FAILURE;
     }
 
+    // validate thread count within allowed range
     std::string thread_count_raw = argv[1];
+    int thread_count = is_valid_thread_count(thread_count_raw)
+    if (thread_count == -1){
+        std::cerr << "Invalid thread count" << std::endl;
+        return EXIT_FAILURE;
+    }
+
     std::string source_dir = argv[2];
     std::string destination_dir = argv[3];
     return EXIT_SUCCESS;
