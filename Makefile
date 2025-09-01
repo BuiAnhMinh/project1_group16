@@ -1,24 +1,15 @@
-
 CXX = g++
-CXXFLAGS = -Wall -Werror -pthread -std=c++17
-TARGETS = mmcopier mscopier
-OBJS = mmcopier.o mscopier.o
+CXXFLAGS = -std=c++17 -Wall -Werror -O2 -pthread
+LDFLAGS = -pthread
+TARGETS = mmcopier   # mscopier
 
-# Default target: build everything
 all: $(TARGETS)
 
-# Build mmcopier
 mmcopier: mmcopier.o
-	$(CXX) $(CXXFLAGS) -o $@ $^
+	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
 
-# Build mscopier
-mscopier: mscopier.o
-	$(CXX) $(CXXFLAGS) -o $@ $^
-
-# Compile .cpp files into .o object files
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-# Clean up build files
 clean:
-	rm -f $(TARGETS) $(OBJS)
+	rm -f $(TARGETS) *.o
