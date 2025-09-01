@@ -3,13 +3,13 @@
 #include <stdexcept>
 #include <string>
 
-int isValidThreadCount(const std::string& threadCountRaw){
-    if (threadCountRaw.size() > 2){
+int is_valid_thread_count(const std::string& thread_count_raw){
+    if (thread_count_raw.size() > 2){
         return -1;
     }
     try {
-        int threadCount = std::stoi(threadCountRaw);
-        return (threadCount >= 2 && threadCount <= 10) ? threadCount : -1;
+        int thread_count = std::stoi(thread_count_raw);
+        return (thread_count >= 2 && thread_count <= 10) ? thread_count : -1;
     } catch (const std::exception& e){
         return -1;
     }
@@ -22,12 +22,11 @@ int main(int argc, char* argv[]){
         return 1;
     }
 
-    std::string threadCountRaw = argv[1];
-    std::string sourceDir = argv[2];
-    std::string destinationDir = argv[3];
+    std::string thread_count_raw = argv[1];
+    std::string source_dir = argv[2];
+    std::string destination_dir = argv[3];
     return 0;
 }
-
 
 
 
