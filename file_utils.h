@@ -12,6 +12,12 @@ enum dir_type_t {
     DESTINATION
 };
 
+enum copy_result_t {
+    COPY_FAILED = 0,
+    COPY_SKIPPED = 1,
+    COPY_SUCCESS = 2
+};
+
 bool directory_exists(const std::string& dir);
 bool file_exists(const std::string& file_path);
 bool check_directory_or_create(const std::string& dir);

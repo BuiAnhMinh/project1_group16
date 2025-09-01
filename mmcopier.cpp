@@ -4,7 +4,6 @@
 #include <pthread.h>
 #include <vector>
 #include <cstdlib>
-#include <filesystem>
 #include "file_utils.h"
 
 const int TOTAL_ARG_COUNT = 4;
@@ -14,6 +13,7 @@ const std::string SOURCE_FILE_PREFIX = "source";
 struct directory_pair_t {
     std::string source_filename;
     std::string destination_filename;
+    copy_result_t result;
 };
 
 int is_valid_thread_count(const std::string& thread_count_raw){
@@ -30,7 +30,6 @@ int is_valid_thread_count(const std::string& thread_count_raw){
 
 void* copy_file(void* directory_pair){
     if (directory_pair == NULL){
-        std::cerr << "Invalid NULL directory pair passed to thread" << std::endl;
         return nullptr;
     }
     directory_pair_t* dirs = static_cast<directory_pair_t*>(directory_pair);
@@ -39,19 +38,21 @@ void* copy_file(void* directory_pair){
     
     // check file exists before copying
     if (!file_exists(source_filename)) {
+        dirs->result = COPY_FAILED;
         return nullptr;
     }
     
     // skip copying if destination file already exists
     if (file_exists(destination_filename)) {
-        std::cout << "File already exists, skipping: " << destination_filename << std::endl;
+        dirs->result = COPY_SKIPPED;
         return nullptr;
     }
     
     try {
         std::filesystem::copy(source_filename, destination_filename);
+        dirs->result = COPY_SUCCESS;
     } catch (const std::exception& e){
-        std::cerr << "Error copying file: " << e.what() << std::endl;
+        dirs->result = COPY_FAILED;
     }
     return nullptr;
 }
@@ -96,7 +97,7 @@ int main(int argc, char* argv[]){
         std::string destination_filename = destination_dir + current_filename;
         
         // create args for directory pair, keep accessible, create thread
-        directory_pair_t current_arg = {source_filename, destination_filename};
+        directory_pair_t current_arg = {source_filename, destination_filename, COPY_FAILED};
         thread_args[i] = current_arg;
         pthread_create(&threads[i], NULL, copy_file, &thread_args[i]);
     }
@@ -105,15 +106,23 @@ int main(int argc, char* argv[]){
     for (int i = 0; i < thread_count; i++){
         int ret = pthread_join(threads[i], NULL);
         if (ret == 0) {
-            std::cout << "Thread " << i << " completed: copied " 
+            std::string status;
+            switch (thread_args[i].result) {
+                case COPY_SUCCESS:
+                    status = "SUCCESS";
+                    break;
+                case COPY_SKIPPED:
+                    status = "SKIPPED";
+                    break;
+                case COPY_FAILED:
+                    status = "FAILED";
+                    break;
+            }
+            std::cout << "Thread " << i << " " << status << ": " 
             << SOURCE_FILE_PREFIX << i + 1 << SOURCE_FILE_TYPE 
             << " from " << thread_args[i].source_filename << " to " 
             << thread_args[i].destination_filename << std::endl;
-        } else {
-            std::cerr << "Error on thread " << i << ": " << ret << std::endl;
         }
     }
     return EXIT_SUCCESS;
 }
-
-
