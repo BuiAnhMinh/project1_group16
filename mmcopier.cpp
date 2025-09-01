@@ -19,13 +19,13 @@ int main(int argc, char* argv[]){
      if (argc != 4){
         std::cerr << "Usage: " << argv[0] 
                   << " <thread_count> <source_dir> <destination_dir>" << std::endl;
-        return 1;
+        return EXIT_FAILURE;
     }
 
     std::string thread_count_raw = argv[1];
     std::string source_dir = argv[2];
     std::string destination_dir = argv[3];
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 
