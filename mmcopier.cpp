@@ -11,6 +11,11 @@ const int TOTAL_ARG_COUNT = 4;
 const std::string SOURCE_FILE_TYPE = ".txt";
 const std::string SOURCE_FILE_PREFIX = "source";
 
+enum dir_type_t {
+    SOURCE,
+    DESTINATION
+};
+
 struct directory_pair_t {
     std::string source_filename;
     std::string destination_filename;
@@ -28,11 +33,13 @@ int is_valid_thread_count(const std::string& thread_count_raw){
     }
 }
 
-bool is_valid_directory(const std::string& dir, const std::string& dir_type){
+bool is_valid_directory(const std::string& dir, dir_type_t dir_type){
     try {
-        if (!std::filesystem::is_directory(dir)) {
+        if (!std::filesystem::is_directory(dir) && dir_type == SOURCE) {
             std::cerr << dir_type << " does not exist or is not a directory" << std::endl;
             return 0;
+        } else if (!std::filesystem::is_directory(dir) && dir_type == DESTINATION){
+            std::filesystem::create_directories(dir);
         }
     } catch (const std::exception& e) {
         std::cerr << dir_type << " directory error: " << e.what() << std::endl;
@@ -75,8 +82,8 @@ int main(int argc, char* argv[]){
     // validate source and destination directories exist and are directories
     std::string source_dir = argv[2];
     std::string destination_dir = argv[3];
-    if (!is_valid_directory(source_dir, "Source") || 
-        !is_valid_directory(destination_dir, "Destination")){
+    if (!is_valid_directory(source_dir, SOURCE) || 
+        !is_valid_directory(destination_dir, DESTINATION)){
         return EXIT_FAILURE;
     }
 
