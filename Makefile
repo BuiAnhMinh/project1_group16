@@ -1,6 +1,6 @@
 
 CXX = g++
-CXXFLAGS = -Wall -Werror -pthread
+CXXFLAGS = -Wall -Werror -pthread -std=c++17
 TARGETS = mmcopier mscopier
 OBJS = mmcopier.o mscopier.o
 
