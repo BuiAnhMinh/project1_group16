@@ -46,7 +46,11 @@ void* copy_file(void* directory_pair){
     directory_pair_t* dirs = static_cast<directory_pair_t*>(directory_pair);
     std::string source_filename = dirs->source_filename;
     std::string destination_filename = dirs->destination_filename;
-    std::filesystem::copy(source_filename, destination_filename);
+    try {
+        std::filesystem::copy(source_filename, destination_filename);
+    } catch (const std::exception& e){
+        std::cerr << "Error copying file: " << e.what() << std::endl;
+    }
     return nullptr;
 }
 
