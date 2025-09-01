@@ -39,6 +39,12 @@ int main(int argc, char* argv[]){
 
     std::string source_dir = argv[2];
     std::string destination_dir = argv[3];
+
+    // initialise threads with id's mapping to source filename
+    std::vector<pthread_t> pthreads(thread_count);
+    for (int i = 0; i < thread_count; i++){
+        std::string source_filename = "task1/source_dir/source" + std::to_string(i) + ".txt";
+    }
     return EXIT_SUCCESS;
 }
 
