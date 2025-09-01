@@ -101,7 +101,7 @@ int main(int argc, char* argv[]){
         // create args for directory pair, keep accessible, create thread
         directory_pair_t current_arg = {source_filename, destination_filename};
         thread_args.push_back(current_arg);
-        pthread_create(&threads[i], NULL, copy_file, &thread_args);
+        pthread_create(&threads[i], NULL, copy_file, &thread_args[i]);
     }
 
     // wait for all threads to complete 
