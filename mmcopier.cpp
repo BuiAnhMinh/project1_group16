@@ -21,6 +21,19 @@ int is_valid_thread_count(const std::string& thread_count_raw){
     }
 }
 
+bool is_valid_directory(const std::string& dir, const std::string& dir_type){
+    try {
+        if (!std::filesystem::is_directory(dir)) {
+            std::cerr << dir_type << " does not exist or is not a directory" << std::endl;
+            return 0;
+        }
+    } catch (const std::exception& e) {
+        std::cerr << dir_type << " directory error: " << e.what() << std::endl;
+        return 0;
+    }
+    return 1;
+}
+
 int main(int argc, char* argv[]){
     // validate correct argument count including function call
      if (argc != REQUIRED_ARG_COUNT){
@@ -37,8 +50,13 @@ int main(int argc, char* argv[]){
         return EXIT_FAILURE;
     }
 
+    // validate source and destination directories exist and are directories
     std::string source_dir = argv[2];
     std::string destination_dir = argv[3];
+    if (!is_valid_directory(source_dir, "Source") || !is_valid_directory(destination_dir, "Destination")){
+        return EXIT_FAILURE;
+    }
+
 
     // initialise threads with id's mapping to source filename
     std::vector<pthread_t> pthreads(thread_count);
