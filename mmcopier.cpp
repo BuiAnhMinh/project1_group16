@@ -81,16 +81,17 @@ int main(int argc, char* argv[]){
     }
 
     // initialise threads with id's mapping to source filename
-    std::vector<pthread_t> pthreads(thread_count);
+    std::vector<pthread_t> threads(thread_count);
+    std::vector<directory_pair_t> thread_args(thread_count);
+
     for (int i = 0; i < thread_count; i++){
         std::string current_id = std::to_string(i);
         std::string current_filename = "/" + SOURCE_FILE_PREFIX + current_id + SOURCE_FILE_TYPE;
         std::string source_filename = source_dir + current_filename;
         std::string destination_filename = destination_dir + current_filename;
-        //pthread_create(&pthreads[i], NULL, your_thread_function, thread_args);
-        pthread_create()
-                
-        // pthread_create(&thread_id, NULL, thread_function, thread_args);
+        
+        directory_pair_t current_arg = {source_filename, destination_filename};
+        std::pthread_create(&threads[i], NULL, copy_file, thread_args);
     }
     return EXIT_SUCCESS;
 }
