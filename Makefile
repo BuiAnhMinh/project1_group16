@@ -5,7 +5,7 @@ TARGETS = mmcopier   # mscopier
 
 all: $(TARGETS)
 
-mmcopier: mmcopier.o
+mmcopier: mmcopier.o file_utils.o
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
 
 %.o: %.cpp

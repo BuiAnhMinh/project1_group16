@@ -1,4 +1,5 @@
 #include "file_utils.h"
+#include <filesystem>
 
 bool directory_exists(const std::string& dir){
     if (std::filesystem::exists(dir) && std::filesystem::is_directory(dir)){
@@ -19,10 +20,10 @@ bool file_exists(const std::string& file_path){
 }
 
 bool check_directory_or_create(const std::string& dir){
-    if (!directory_exists(dir)) {
+    if (!std::filesystem::exists(dir) || !std::filesystem::is_directory(dir)) {
         try {
             std::filesystem::create_directories(dir);
-            return true;
+            return directory_exists(dir);
         } catch (const std::exception& e){
             std::cerr << "Error creating directory: " << e.what() << std::endl;
             return false;

@@ -5,6 +5,7 @@
 #include <filesystem>
 #include <iostream>
 #include <stdexcept>
+#include <filesystem>
 
 enum dir_type_t {
     SOURCE,
@@ -14,6 +15,5 @@ enum dir_type_t {
 bool directory_exists(const std::string& dir);
 bool file_exists(const std::string& file_path);
 bool check_directory_or_create(const std::string& dir);
-bool is_valid_directory(const std::string& dir, dir_type_t dir_type);
 
 #endif // FILE_UTILS_H

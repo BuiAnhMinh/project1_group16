@@ -4,6 +4,7 @@
 #include <pthread.h>
 #include <vector>
 #include <cstdlib>
+#include <filesystem>
 #include "file_utils.h"
 
 const int TOTAL_ARG_COUNT = 4;
@@ -25,21 +26,6 @@ int is_valid_thread_count(const std::string& thread_count_raw){
     } catch (const std::exception& e){
         return -1;
     }
-}
-
-bool is_valid_directory(const std::string& dir, dir_type_t dir_type){
-    try {
-        if (!directory_exists(dir) && dir_type == SOURCE) {
-            std::cerr << dir_type << " does not exist or is not a directory" << std::endl;
-            return false;
-        } else if (!directory_exists(dir) && dir_type == DESTINATION){
-            std::filesystem::create_directories(dir);
-        }
-    } catch (const std::exception& e) {
-        std::cerr << dir_type << " directory error: " << e.what() << std::endl;
-        return false;
-    }
-    return true;
 }
 
 void* copy_file(void* directory_pair){
@@ -79,11 +65,15 @@ int main(int argc, char* argv[]){
         return EXIT_FAILURE;
     }
 
-    // validate source and destination directories exist and are directories
+    // validate source directory exists otherwise no files to copy
     std::string source_dir = argv[2];
+    if (!directory_exists(source_dir)){
+        return EXIT_FAILURE;
+    }
+
+    // validate or create destination directory
     std::string destination_dir = argv[3];
-    if (!is_valid_directory(source_dir, SOURCE) || 
-        !is_valid_directory(destination_dir, DESTINATION)){
+    if (!check_directory_or_create(destination_dir)){
         return EXIT_FAILURE;
     }
 
@@ -115,6 +105,5 @@ int main(int argc, char* argv[]){
     }
     return EXIT_SUCCESS;
 }
-
 
 
