@@ -8,6 +8,8 @@
 #include <cstdlib>
 
 const int TOTAL_ARG_COUNT = 4;
+const std::string SOURCE_FILE_TYPE = ".txt";
+const std::string SOURCE_FILE_PREFIX = "source";
 
 struct directory_pair_t {
     std::string source_filename;
@@ -81,8 +83,10 @@ int main(int argc, char* argv[]){
     // initialise threads with id's mapping to source filename
     std::vector<pthread_t> pthreads(thread_count);
     for (int i = 0; i < thread_count; i++){
-        std::string source_filename = source_dir + std::to_string(i) + ".txt";
-        std::string destination_filename;
+        std::string current_id = std::to_string(i);
+        std::string current_filename = "/" + SOURCE_FILE_PREFIX + current_id + SOURCE_FILE_TYPE;
+        std::string source_filename = source_dir + current_filename;
+        std::string destination_filename = destination_dir + current_filename;
         //pthread_create(&pthreads[i], NULL, your_thread_function, thread_args);
         pthread_create()
                 
