@@ -4,3 +4,5 @@
 mscopier.o
 mscopier
 mmcopier
+*.o
+mmcopier

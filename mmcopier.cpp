@@ -84,14 +84,27 @@ int main(int argc, char* argv[]){
     std::vector<pthread_t> threads(thread_count);
     std::vector<directory_pair_t> thread_args(thread_count);
 
+    // create all threads with required args
     for (int i = 0; i < thread_count; i++){
         std::string current_id = std::to_string(i);
         std::string current_filename = "/" + SOURCE_FILE_PREFIX + current_id + SOURCE_FILE_TYPE;
         std::string source_filename = source_dir + current_filename;
         std::string destination_filename = destination_dir + current_filename;
         
+        // create args for directory pair, keep accessible, create thread
         directory_pair_t current_arg = {source_filename, destination_filename};
-        std::pthread_create(&threads[i], NULL, copy_file, thread_args);
+        thread_args.push_back(current_arg);
+        pthread_create(&threads[i], NULL, copy_file, &thread_args);
+    }
+
+    // wait for all threads to complete 
+    for (int i = 0; i < thread_count; i++){
+        int ret = pthread_join(threads[i], NULL);
+        if (ret == 0) {
+            std::cout << "Thread " << i << " completed successfully" << std::endl;
+        } else {
+            std::cerr << "Error on thread " << i << ": " << ret << std::endl;
+        }
     }
     return EXIT_SUCCESS;
 }
