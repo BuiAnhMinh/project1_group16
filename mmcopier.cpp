@@ -41,6 +41,13 @@ void* copy_file(void* directory_pair){
     if (!file_exists(source_filename)) {
         return nullptr;
     }
+    
+    // skip copying if destination file already exists
+    if (file_exists(destination_filename)) {
+        std::cout << "File already exists, skipping: " << destination_filename << std::endl;
+        return nullptr;
+    }
+    
     try {
         std::filesystem::copy(source_filename, destination_filename);
     } catch (const std::exception& e){
@@ -83,7 +90,7 @@ int main(int argc, char* argv[]){
 
     // create all threads with required args
     for (int i = 0; i < thread_count; i++){
-        std::string current_id = std::to_string(i);
+        std::string current_id = std::to_string(i + 1);
         std::string current_filename = "/" + SOURCE_FILE_PREFIX + current_id + SOURCE_FILE_TYPE;
         std::string source_filename = source_dir + current_filename;
         std::string destination_filename = destination_dir + current_filename;
@@ -98,7 +105,10 @@ int main(int argc, char* argv[]){
     for (int i = 0; i < thread_count; i++){
         int ret = pthread_join(threads[i], NULL);
         if (ret == 0) {
-            std::cout << "Thread " << i << " completed successfully" << std::endl;
+            std::cout << "Thread " << i << " completed: copied " 
+            << SOURCE_FILE_PREFIX << i + 1 << SOURCE_FILE_TYPE 
+            << " from " << thread_args[i].source_filename << " to " 
+            << thread_args[i].destination_filename << std::endl;
         } else {
             std::cerr << "Error on thread " << i << ": " << ret << std::endl;
         }
