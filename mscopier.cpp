@@ -22,20 +22,27 @@ pthread_cond_t not_full;
 pthread_cond_t not_empty;
 
 // Add terminiation logic globals
+int active_readers = 0; // counter of reader that haven't reached end of file yet
+int writers_total = 0; 
 
 // Simple enqueue (no locks yet)
 void enqueue(char *line) {
     pthread_mutex_lock(&queue_mutex);
-    printf("[Thread %lu] ADDED TO QUEUE: %s", pthread_self(), line);
     while (count == MAX_QUEUE) {
         // Wait for consumer to remove items from queue
         printf("QUEUE FULL\n");
         pthread_cond_wait(&not_full, &queue_mutex);
     }
-    pthread_cond_signal(&not_empty);
-    queue[rear] = strdup(line);
+    queue[rear] = line ? strdup(line) : NULL; // poison pill allowed
     rear = (rear + 1) % MAX_QUEUE;
     count++;
+    pthread_cond_signal(&not_empty);
+
+    if (line)
+        printf("[Thread %llu] ADDED TO QUEUE: %s", (unsigned long long)pthread_self(), line);
+    else
+        printf("[Thread %llu] ADDED POISON PILL\n", (unsigned long long)pthread_self());
+
     pthread_mutex_unlock(&queue_mutex);
 }
 
@@ -47,46 +54,86 @@ char *dequeue() {
         printf("QUEUE EMPTY\n");
         pthread_cond_wait(&not_empty, &queue_mutex);
     }
+    
     char *line = queue[front];
-    printf("[Thread %lu] READ %s", pthread_self(), line);
     front = (front + 1) % MAX_QUEUE;
     count--;
     pthread_cond_signal(&not_full);
+
+    if (line)
+        printf("[Thread %llu] READ %s", (unsigned long long)pthread_self(), line);
+    else
+        printf("[Thread %llu] RECEIVED POISON PILL\n", (unsigned long long)pthread_self());
+
     pthread_mutex_unlock(&queue_mutex);
-    return line;
+    return line; // this can be NULL (posion pill)
 }
 
 // Reader thread
 void *reader_thread(void *arg) {
-    char line[MAX_LINE];
-    while (1) {
-        // Critical: read from source file
+    // char line[MAX_LINE];
+    // while (1) {
+    //     // Critical: read from source file
+    //     pthread_mutex_lock(&file_mutex);
+    //     if (fgets(line, sizeof(line), src) == NULL) {
+    //         // Add termination logic here
+    //         pthread_mutex_unlock(&file_mutex);
+    //         break; // End of file
+    //     }
+    //     enqueue(line);
+    //     pthread_mutex_unlock(&file_mutex);
+    // }
+    // return NULL;
+    char line [MAX_LINE];
+    for (;;){
         pthread_mutex_lock(&file_mutex);
-        if (fgets(line, sizeof(line), src) == NULL) {
-            // Add termination logic here
+        char *got = fgets(line, sizeof(line), src);
+        if (!got){
+            //this reader is finished
+            active_readers--;
+            int remaining = active_readers;
             pthread_mutex_unlock(&file_mutex);
-            break; // End of file
+
+            if (remaining == 0){
+                // last reader : send N poison pills
+                for (int i = 0; i < writers_total; i++){
+                    enqueue(NULL);
+                }
+            }
+            break;
         }
-        enqueue(line);
         pthread_mutex_unlock(&file_mutex);
+        enqueue(line);
     }
     return NULL;
 }
 
 // Writer thread
 void *writer_thread(void *arg) {
-    pthread_mutex_lock(&write_mutex);
-    while (1) {
+    // pthread_mutex_lock(&write_mutex);
+    // while (1) {
+    //     char *line = dequeue();
+    //     if (line == NULL) {
+    //         // nothing in queue yet, just continue
+    //         continue;
+    //     }
+    //     fprintf(dst, "%s", line);
+    //     free(line);
+    // }
+    // pthread_mutex_unlock(&write_mutex);
+    // return NULL;
+
+    for (;;){
         char *line = dequeue();
         if (line == NULL) {
-            // nothing in queue yet, just continue
-            continue;
+            break;
         }
-        fprintf(dst, "%s", line);
+        pthread_mutex_lock(&write_mutex);
+        fputs(line, dst);
+        pthread_mutex_unlock(&write_mutex);
         free(line);
     }
-    pthread_mutex_unlock(&write_mutex);
-    return NULL;
+    return NULL; 
 }
 
 int main(int argc, char *argv[]) {
@@ -121,6 +168,9 @@ int main(int argc, char *argv[]) {
     pthread_mutex_init(&queue_mutex, NULL);
     pthread_cond_init(&not_full, NULL);
     pthread_cond_init(&not_empty, NULL);
+
+    active_readers = n;
+    writers_total = n;
 
     pthread_t readers[n], writers[n];
 

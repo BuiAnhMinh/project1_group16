@@ -1,13 +1,16 @@
 CXX = g++
 CXXFLAGS = -std=c++17 -Wall -Werror -O2 -pthread
 LDFLAGS = -pthread
-TARGETS = mmcopier   # mscopier
+TARGETS = mmcopier    mscopier
 
 all: $(TARGETS)
 
 mmcopier: mmcopier.o file_utils.o
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
 
+mscopier: mscopier.o
+	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
+	
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
