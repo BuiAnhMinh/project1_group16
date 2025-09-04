@@ -3,7 +3,7 @@ CXX     := g++
 
 # Flags
 CXXFLAGS := -std=c++17 -Wall -Werror -O2 -pthread
-LDLIBS   := -pthread
+LDLIBS   := -pthread -lstdc++fs
 
 # Targets
 TARGETS := mmcopier mscopier
