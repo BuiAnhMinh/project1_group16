@@ -4,9 +4,11 @@
 #include <pthread.h>
 #include <vector>
 #include <cstdlib>
+#include <filesystem>
 #include "file_utils.h"
 
-const int TOTAL_ARG_COUNT = 4;
+constexpr int TOTAL_ARG_COUNT = 4;
+
 const std::string SOURCE_FILE_TYPE = ".txt";
 const std::string SOURCE_FILE_PREFIX = "source";
 
@@ -62,7 +64,7 @@ int main(int argc, char* argv[]){
      if (argc != TOTAL_ARG_COUNT){
         std::cerr << "Usage: " << argv[0] 
                   << " <thread_count> <source_dir> <destination_dir>" << std::endl;
-        return EXIT_FAILURE;
+        exit(1);
     }
 
     // validate thread count within allowed range
@@ -70,19 +72,19 @@ int main(int argc, char* argv[]){
     int thread_count = is_valid_thread_count(thread_count_raw);
     if (thread_count == -1){
         std::cerr << "Invalid thread count" << std::endl;
-        return EXIT_FAILURE;
+        exit(1);
     }
 
     // validate source directory exists otherwise no files to copy
     std::string source_dir = argv[2];
     if (!directory_exists(source_dir)){
-        return EXIT_FAILURE;
+        exit(1);
     }
 
     // validate or create destination directory
     std::string destination_dir = argv[3];
     if (!check_directory_or_create(destination_dir)){
-        return EXIT_FAILURE;
+        exit(1);
     }
 
     // initialise threads with id's mapping to source filename
@@ -124,5 +126,5 @@ int main(int argc, char* argv[]){
             << thread_args[i].destination_filename << std::endl;
         }
     }
-    return EXIT_SUCCESS;
+    return 0;
 }
