@@ -102,8 +102,9 @@ void *reader_thread(void *arg) {
             }
             break;
         }
-        pthread_mutex_unlock(&file_mutex);
         enqueue(line);
+        pthread_mutex_unlock(&file_mutex);
+
     }
     return NULL;
 }
