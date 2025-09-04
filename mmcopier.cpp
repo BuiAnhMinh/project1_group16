@@ -98,16 +98,10 @@ int main(int argc, char* argv[]){
         exit(1);
     }
 
-    // create or validate destination directory exists
+    // validate destination directory exists otherwise no files to copy
     std::string destination_dir = argv[3];
-    try {
-        std::filesystem::create_directories(destination_dir);
-        if (!directory_exists(destination_dir)) {
-            std::cerr << "Error creating destination directory" << std::endl;
-            exit(1);
-        }
-    } catch (const std::exception& e) {
-        std::cerr << "Error creating destination directory: " << e.what() << std::endl;
+    if (!directory_exists(source_dir)){
+        std::cerr << "Destination directory does not exist" << std::endl;
         exit(1);
     }
 
