@@ -1,5 +1,4 @@
 #include <string>
-#include <stdexcept>
 #include <iostream>
 #include <pthread.h>
 #include <vector>
@@ -8,10 +7,8 @@
 #include "file_utils.h"
 
 constexpr int TOTAL_ARG_COUNT = 4;
-
-const std::string SOURCE_FILE_TYPE = ".txt";
-const std::string SOURCE_FILE_PREFIX = "source";
-
+constexpr const char* SOURCE_FILE_TYPE  = ".txt";
+constexpr const char* SOURCE_FILE_PREFIX = "source";
 struct directory_pair_t {
     std::string source_filename;
     std::string destination_filename;
