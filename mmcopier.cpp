@@ -9,6 +9,7 @@
 constexpr int TOTAL_ARG_COUNT = 4;
 constexpr const char* SOURCE_FILE_TYPE  = ".txt";
 constexpr const char* SOURCE_FILE_PREFIX = "source";
+
 struct directory_pair_t {
     std::string source_filename;
     std::string destination_filename;
@@ -88,7 +89,7 @@ int main(int argc, char* argv[]){
     // create all threads with required args
     for (int i = 0; i < thread_count; i++){
         std::string current_id = std::to_string(i + 1);
-        std::string current_filename = "/" + SOURCE_FILE_PREFIX + current_id + SOURCE_FILE_TYPE;
+        std::string current_filename = std::string("/") + SOURCE_FILE_PREFIX + current_id + SOURCE_FILE_TYPE;
         std::string source_filename = source_dir + current_filename;
         std::string destination_filename = destination_dir + current_filename;
         
