@@ -17,9 +17,6 @@ struct directory_pair_t {
 };
 
 int is_valid_thread_count(const std::string& thread_count_raw){
-    if (thread_count_raw.size() > 2){
-        return -1;
-    }
     try {
         int thread_count = std::stoi(thread_count_raw);
         return (thread_count >= 2 && thread_count <= 10) ? thread_count : -1;
