@@ -3,11 +3,11 @@ CXX     := g++
 
 # Flags
 CXXFLAGS := -std=c++17 -Wall -Werror -O2 -pthread
-LDLIBS   := -pthread -lstdc++fs
+LDLIBS   := -pthread
 
 # Targets
 TARGETS := mmcopier mscopier
-MMCOPIER_OBJS := mmcopier.o file_utils.o
+MMCOPIER_OBJS := mmcopier.o
 MSCOPIER_OBJS := mscopier.o
 
 .PHONY: all clean
