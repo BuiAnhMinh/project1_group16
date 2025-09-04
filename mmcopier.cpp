@@ -3,14 +3,23 @@
 #include <pthread.h>
 #include <vector>
 #include <cstdlib>
-#include <filesystem>
-#include "file_utils.h"
 
 constexpr int TOTAL_ARG_COUNT = 4;
 constexpr const char* SOURCE_FILE_TYPE  = ".txt";
 constexpr const char* SOURCE_FILE_PREFIX = "source";
 constexpr int MIN_THREAD_COUNT = 2;
 constexpr int MAX_THREAD_COUNT = 10;
+
+enum dir_type_t {
+    SOURCE,
+    DESTINATION
+};
+
+enum copy_result_t {
+    COPY_FAILED = 0,
+    COPY_SKIPPED = 1,
+    COPY_SUCCESS = 2
+};
 
 struct directory_pair_t {
     std::string source_filename;
