@@ -35,10 +35,10 @@ bool directory_exists(const std::string& path) {
     struct stat sb;
     return (stat(path.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode));
 }
+
 void* copy_file(void* directory_pair){
-    if (directory_pair == NULL){
-        return nullptr;
-    }
+    if (directory_pair == NULL) return nullptr;
+
     directory_pair_t* dirs = static_cast<directory_pair_t*>(directory_pair);
     std::string source_filename = dirs->source_filename;
     std::string destination_filename = dirs->destination_filename;
@@ -49,14 +49,20 @@ void* copy_file(void* directory_pair){
         return nullptr;
     }
     
-    // skip copying if destination file already exists
-    if (file_exists(destination_filename)) {
+    // skip copying if destination file already exists or to same location
+    if (file_exists(destination_filename) || (source_filename == destination_filename)){
         dirs->result = COPY_SKIPPED;
         return nullptr;
     }
     
     try {
-        std::filesystem::copy(source_filename, destination_filename);
+        // output file stream from source to dest, check for errors
+        std::ifstream source(source_filename, std::ios::binary);
+        std::ofstream dest(destination_filename, std::ios::binary);
+        if (!source.is_open() || !dest.is_open()) return nullptr;
+        dest << source.rdbuf();
+        if (!source || !dest) return nullptr;
+        
         dirs->result = COPY_SUCCESS;
     } catch (const std::exception& e){
         dirs->result = COPY_FAILED;
