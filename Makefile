@@ -18,7 +18,7 @@ mmcopier: $(MMCOPIER_OBJS)
 	$(CXX) -o $@ $^ $(LDLIBS)
 
 mscopier: $(MSCOPIER_OBJS)
-	$(CC) -o $@ $^ $(LDLIBS)
+	$(CXX) -o $@ $^ $(LDLIBS)
 
 # Compile rules (handle both C and C++)
 %.o: %.c

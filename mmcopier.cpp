@@ -57,8 +57,8 @@ void* copy_file(void* directory_pair){
 int main(int argc, char* argv[]){
     // validate correct argument count including function call
      if (argc != TOTAL_ARG_COUNT){
-        std::cerr << "Usage: " << argv[0] 
-                  << " <thread_count> <source_dir> <destination_dir>" << std::endl;
+        std::cerr << "Invalid number of arguments, must be " << TOTAL_ARG_COUNT << std::endl;
+        std::cerr << "Usage: " << argv[0] << "<thread_count> <source_dir> <destination_dir>" << std::endl;
         exit(1);
     }
 
@@ -66,19 +66,22 @@ int main(int argc, char* argv[]){
     std::string thread_count_raw = argv[1];
     int thread_count = is_valid_thread_count(thread_count_raw);
     if (thread_count == -1){
-        std::cerr << "Invalid thread count" << std::endl;
+        std::cerr << "Invalid thread count, must be between 2 and 10" << std::endl;
         exit(1);
     }
 
     // validate source directory exists otherwise no files to copy
     std::string source_dir = argv[2];
     if (!directory_exists(source_dir)){
+        std::cerr << "Source directory does not exist" << std::endl;
         exit(1);
     }
 
-    // validate or create destination directory
+    // create or validate destination directory exists
     std::string destination_dir = argv[3];
-    if (!check_directory_or_create(destination_dir)){
+    int res = std::filesystem::create_directories(destination_dir);
+    if (!res){
+        std::cerr << "Error creating destination directory" << std::endl;
         exit(1);
     }
 
@@ -121,5 +124,17 @@ int main(int argc, char* argv[]){
             << thread_args[i].destination_filename << std::endl;
         }
     }
+
+    // @TODO: remove this for final submission
+    // delete destination directory after output printed
+    try {
+        std::filesystem::remove_all(destination_dir);
+    } catch (const std::exception& e) {
+        std::cerr << "Error deleting destination directory: " << e.what() << std::endl;
+    }
+
+
+
+    
     return 0;
 }
