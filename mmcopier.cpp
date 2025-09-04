@@ -9,6 +9,8 @@
 constexpr int TOTAL_ARG_COUNT = 4;
 constexpr const char* SOURCE_FILE_TYPE  = ".txt";
 constexpr const char* SOURCE_FILE_PREFIX = "source";
+constexpr int MIN_THREAD_COUNT = 2;
+constexpr int MAX_THREAD_COUNT = 10;
 
 struct directory_pair_t {
     std::string source_filename;
@@ -57,7 +59,7 @@ int main(int argc, char* argv[]){
     int thread_count;
     try {
         thread_count = std::stoi(argv[1]);
-        if (thread_count < 2 || thread_count > 10){
+        if (thread_count < MIN_THREAD_COUNT || thread_count > MAX_THREAD_COUNT){
             std::cerr << "Invalid thread count, must be between 2 and 10" << std::endl;
             exit(1);
         }
@@ -93,14 +95,19 @@ int main(int argc, char* argv[]){
     // create all threads with required args
     for (int i = 0; i < thread_count; i++){
         std::string current_id = std::to_string(i + 1);
-        std::string current_filename = std::string("/") + SOURCE_FILE_PREFIX + current_id + SOURCE_FILE_TYPE;
-        std::string source_filename = source_dir + current_filename;
-        std::string destination_filename = destination_dir + current_filename;
+        std::string current_filename = SOURCE_FILE_PREFIX + current_id + SOURCE_FILE_TYPE;
+        
+        // protect against directories with "/" or "//"
+        std::filesystem::path source_filename = std::filesystem::path(source_dir) / current_filename;
+        std::filesystem::path destination_filename = std::filesystem::path(destination_dir) / current_filename;
         
         // create args for directory pair, keep accessible, create thread
-        directory_pair_t current_arg = {source_filename, destination_filename, COPY_FAILED};
-        thread_args[i] = current_arg;
-        pthread_create(&threads[i], NULL, copy_file, &thread_args[i]);
+        thread_args[i] = {source_filename.string(), destination_filename.string(), COPY_FAILED};
+        int ret = pthread_create(&threads[i], NULL, copy_file, &thread_args[i]);
+        if (ret != 0) {
+            std::cerr << "Error creating thread " << i << ": " << ret << std::endl;
+            exit(1);
+        }
     }
 
     // wait for all threads to complete 
@@ -130,12 +137,10 @@ int main(int argc, char* argv[]){
     // delete destination directory after output printed
     try {
         std::filesystem::remove_all(destination_dir);
+        std::cout << "Deleted destination directory: " << destination_dir << std::endl;
     } catch (const std::exception& e) {
         std::cerr << "Error deleting destination directory: " << e.what() << std::endl;
     }
 
-
-
-    
     return 0;
 }
