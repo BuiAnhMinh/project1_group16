@@ -1,16 +1,29 @@
-CXX = g++
-CXXFLAGS = -std=c++17 -Wall -Werror -O2 -pthread
-LDFLAGS = -pthread
-TARGETS = mmcopier    mscopier
+# Compilers
+CXX     := g++
 
+# Flags
+CXXFLAGS := -std=c++17 -Wall -Werror -O2 -pthread
+LDLIBS   := -pthread
+
+# Targets
+TARGETS := mmcopier mscopier
+MMCOPIER_OBJS := mmcopier.o file_utils.o
+MSCOPIER_OBJS := mscopier.o
+
+.PHONY: all clean
 all: $(TARGETS)
 
-mmcopier: mmcopier.o file_utils.o
-	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
+# Link rules
+mmcopier: $(MMCOPIER_OBJS)
+	$(CXX) -o $@ $^ $(LDLIBS)
 
-mscopier: mscopier.o
-	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
-	
+mscopier: $(MSCOPIER_OBJS)
+	$(CC) -o $@ $^ $(LDLIBS)
+
+# Compile rules (handle both C and C++)
+%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
