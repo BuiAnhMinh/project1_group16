@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <vector>
 
 #define MAX_QUEUE 20
 #define MAX_LINE 1024
@@ -14,7 +15,6 @@ int front = 0, rear = 0, count = 0;
 FILE *src, *dst;
 
 // Number of threads
-int n;
 pthread_mutex_t file_mutex;
 pthread_mutex_t write_mutex;
 pthread_mutex_t queue_mutex;
@@ -144,7 +144,7 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
     // Checking if the number of threads is between 2 and 10
-    n = atoi(argv[1]);
+    int n = atoi(argv[1]);
     if (n < 2 || n > 10) {
         fprintf(stderr, "n must be between 2 and 10\n");
         exit(1);
@@ -172,7 +172,8 @@ int main(int argc, char *argv[]) {
     active_readers = n;
     writers_total = n;
 
-    pthread_t readers[n], writers[n];
+    std::vector<pthread_t> readers(n);
+    std::vector<pthread_t> writers(n);
 
     // Create threads
     for (int i = 0; i < n; i++) {
