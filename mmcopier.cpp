@@ -16,15 +16,6 @@ struct directory_pair_t {
     copy_result_t result;
 };
 
-int is_valid_thread_count(const std::string& thread_count_raw){
-    try {
-        int thread_count = std::stoi(thread_count_raw);
-        return (thread_count >= 2 && thread_count <= 10) ? thread_count : -1;
-    } catch (const std::exception& e){
-        return -1;
-    }
-}
-
 void* copy_file(void* directory_pair){
     if (directory_pair == NULL){
         return nullptr;
@@ -63,10 +54,15 @@ int main(int argc, char* argv[]){
     }
 
     // validate thread count within allowed range
-    std::string thread_count_raw = argv[1];
-    int thread_count = is_valid_thread_count(thread_count_raw);
-    if (thread_count == -1){
-        std::cerr << "Invalid thread count, must be between 2 and 10" << std::endl;
+    int thread_count;
+    try {
+        thread_count = std::stoi(argv[1]);
+        if (thread_count < 2 || thread_count > 10){
+            std::cerr << "Invalid thread count, must be between 2 and 10" << std::endl;
+            exit(1);
+        }
+    } catch (const std::exception& e){
+        std::cerr << "Invalid thread count, must be an integer" << std::endl;
         exit(1);
     }
 
@@ -79,9 +75,14 @@ int main(int argc, char* argv[]){
 
     // create or validate destination directory exists
     std::string destination_dir = argv[3];
-    int res = std::filesystem::create_directories(destination_dir);
-    if (!res){
-        std::cerr << "Error creating destination directory" << std::endl;
+    try {
+        std::filesystem::create_directories(destination_dir);
+        if (!directory_exists(destination_dir)) {
+            std::cerr << "Error creating destination directory" << std::endl;
+            exit(1);
+        }
+    } catch (const std::exception& e) {
+        std::cerr << "Error creating destination directory: " << e.what() << std::endl;
         exit(1);
     }
 
