@@ -27,6 +27,14 @@ struct directory_pair_t {
     copy_result_t result;
 };
 
+bool file_exists(const std::string& file_path){
+    return std::ifstream(file_path).good();
+}
+
+bool directory_exists(const std::string& path) {
+    struct stat sb;
+    return (stat(path.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode));
+}
 void* copy_file(void* directory_pair){
     if (directory_pair == NULL){
         return nullptr;
