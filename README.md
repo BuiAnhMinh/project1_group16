@@ -16,8 +16,31 @@ All team members collaborated on the following:
 - Testing compilation on RMIT servers (tested on Titan, Jupiter, Saturn)
 
 ---
+## **Locks and Condition Variables**
 
-## **
+### Mutex Declarations
+- **Line 17:** `pthread_mutex_t file_mutex;`
+- **Line 18:** `pthread_mutex_t write_mutex;`
+- **Line 19:** `pthread_mutex_t queue_mutex;`
+
+### Condition Variable Declarations
+- **Line 20:** `pthread_cond_t not_full;`
+- **Line 21:** `pthread_cond_t not_empty;`
+
+### Mutex Initializations
+- **Lines 127-132:** All three mutexes initialized with error checking
+
+### Condition Variable Initializations
+- **Lines 133-136:** Both condition variables initialized with error checking
+
+### Mutex Usage
+- **Lines 27, 38, 59, 67, 72, 80, 87, 92:** Lock/unlock operations for `queue_mutex`, `file_mutex`, and `write_mutex`
+
+### Condition Variable Usage
+- **Line 31:** `pthread_cond_wait(&not_full, &queue_mutex);`
+- **Line 35:** `pthread_cond_signal(&not_empty);`
+- **Line 48:** `pthread_cond_wait(&not_empty, &queue_mutex);`
+- **Line 53:** `pthread_cond_signal(&not_full);`
 
 ---
 
