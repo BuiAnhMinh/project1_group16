@@ -13,7 +13,7 @@ constexpr const char* SOURCE_FILE_TYPE  = ".txt";
 constexpr int MIN_THREAD_COUNT = 2;
 constexpr int MAX_THREAD_COUNT = 10;
 constexpr char FORWARD_SLASH = '/';
-constexpr char CURRENT_DIR = '.';
+constexpr char PERIOD = '.';
 constexpr const char* PARENT_DIR = "..";
 
 enum copy_result_t {
@@ -33,27 +33,26 @@ struct directory_pair_t {
 // parse a valid filename in directory to determine files to copy
 // assumes source only contains files matching the format required
 // assumes ".txt" file contains only letters before the file number
-std::string determine_filename(const std::string& source_dir){
+std::string determine_filenames(const std::string& source_dir){
     DIR *directory_ptr;
     struct dirent *directory_entry;
     directory_ptr = opendir(source_dir.c_str());
     if (directory_ptr) {
+        std::vector<std::string> filenames;
         while ((directory_entry = readdir(directory_ptr)) != NULL) {
             std::string found_filename = directory_entry->d_name;
-            if (found_filename[0] != CURRENT_DIR && found_filename != PARENT_DIR && found_filename != ""){
+            if (found_filename[0] != PERIOD && found_filename != PARENT_DIR && found_filename != ""){
                 try {
-                    // remove source file type component
-                    std::regex txt_regex(SOURCE_FILE_TYPE);
-                    found_filename = std::regex_replace(found_filename, txt_regex, std::string(""));
-                    std::string filename = "";
-
-                    // filter for only letters
-                    for (char c : found_filename){
-                        if (std::isalpha(static_cast<unsigned char>(c))) {
-                            filename += c;
+                    size_t period_idx = found_filename.find(PERIOD);
+                    if (period_idx != std::string::npos) {
+                        std::string filename_no_type = found_filename.substr(0, period_idx);
+                        // trim numbers from the end
+                        while (!filename_no_type.empty() && 
+                            std::isdigit(static_cast<unsigned char>(filename_no_type.back()))) {
+                            filename_no_type.pop_back();
                         }
+                        return filename_no_type;
                     }
-                    return filename;
                 } catch (const std::exception& e) {
                     // empty string for error
                     return "";
