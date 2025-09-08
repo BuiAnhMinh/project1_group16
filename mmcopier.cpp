@@ -74,6 +74,15 @@ bool directory_exists(const std::string& path){
     return (stat(path.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode));
 }
 
+// check if file is empty using stat
+bool is_file_empty(const std::string& path){
+    struct stat st;
+    if (stat(path.c_str(), &st) == 0){
+        return st.st_size == 0;
+    }
+    return false;
+}
+
 // normalise dir to have SLASH at end
 std::string normalise_dir(std::string path){
     if (path.empty()) return {};
@@ -97,17 +106,31 @@ void* copy_file(void* directory_pair){
 
     // skip copying if destination file already exists at dest
     if (file_exists(destination_filename)){
-        dirs->result = SKIPPED_FILE_ALREADY_EXISTS;
+        bool source_empty = is_file_empty(source_filename);
+        bool dest_empty = is_file_empty(destination_filename);
+        if (source_empty && dest_empty){
+            // empty files are always "copied"
+            dirs->result = COPY_SUCCESS;
+        } else {
+            dirs->result = SKIPPED_FILE_ALREADY_EXISTS;
+        }
         return nullptr;
     }
-    
     try {
         // output file stream from source to dest, check for errors
         std::ifstream source(source_filename, std::ios::binary);
         std::ofstream dest(destination_filename, std::ios::binary);
-        if (!source.is_open() || !dest.is_open()) return nullptr;
+        if (!source.is_open() || !dest.is_open()) {
+            dirs->result = COPY_ERROR;
+            return nullptr;
+        }
+
         dest << source.rdbuf();
-        if (!source || !dest) return nullptr;
+        if (dest.fail() || source.bad()) {
+            dirs->result = COPY_ERROR;
+            return nullptr;
+        }
+
         dirs->result = COPY_SUCCESS;
     } catch (const std::exception& e){
         dirs->result = COPY_ERROR;
