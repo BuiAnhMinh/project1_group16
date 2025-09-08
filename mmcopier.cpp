@@ -5,13 +5,16 @@
 #include <cstdlib>
 #include <fstream>
 #include <sys/stat.h>
+#include <dirent.h>
+#include <regex>
 
 constexpr int TOTAL_ARG_COUNT = 4;
 constexpr const char* SOURCE_FILE_TYPE  = ".txt";
-constexpr const char* SOURCE_FILE_PREFIX = "source";
 constexpr int MIN_THREAD_COUNT = 2;
 constexpr int MAX_THREAD_COUNT = 10;
 constexpr char FORWARD_SLASH = '/';
+constexpr char CURRENT_DIR = '.';
+constexpr const char* PARENT_DIR = "..";
 
 enum copy_result_t {
     NOT_COPIED,
@@ -26,6 +29,42 @@ struct directory_pair_t {
     std::string destination_filename;
     copy_result_t result;
 };
+
+// parse a valid filename in directory to determine files to copy
+// assumes source only contains files matching the format required
+// assumes ".txt" file contains only letters before the file number
+std::string determine_filename(const std::string& source_dir){
+    DIR *directory_ptr;
+    struct dirent *directory_entry;
+    directory_ptr = opendir(source_dir.c_str());
+    if (directory_ptr) {
+        while ((directory_entry = readdir(directory_ptr)) != NULL) {
+            std::string found_filename = directory_entry->d_name;
+            if (found_filename[0] != CURRENT_DIR && found_filename != PARENT_DIR){
+                try {
+                    // remove source file type component
+                    std::regex txt_regex(SOURCE_FILE_TYPE);
+                    found_filename = std::regex_replace(found_filename, txt_regex, "");
+                    std::string filename = "";
+
+                    // filter for only letters
+                    for (char c : found_filename){
+                        if (std::isalpha(static_cast<unsigned char>(c))) {
+                            filename += c;
+                        }
+                    }
+                    return filename;
+                } catch (const std::exception& e) {
+                    // empty string for error
+                    return "";
+                }
+            } 
+        }
+        closedir(directory_ptr);
+    }
+    // return empty string to signal an error 
+    return "";
+}
 
 bool file_exists(const std::string& file_path){
     return std::ifstream(file_path).good();
@@ -117,13 +156,19 @@ int main(int argc, char* argv[]){
         exit(1);
     }
 
+    std::string source_file_prefix = determine_filename(source_dir);
+    if (source_file_prefix == ""){
+        std::cerr << "Invalid file prefix found: " << source_file_prefix << std::endl;
+        exit(1);
+    }
+
     // initialise threads with id's mapping to source filename
     std::vector<pthread_t> threads(thread_count);
     std::vector<directory_pair_t> thread_args(thread_count);
 
     // create all threads with required args
     for (int i = 0; i < thread_count; i++){
-        std::string current_filename = SOURCE_FILE_PREFIX + std::to_string(i + 1) + SOURCE_FILE_TYPE;
+        std::string current_filename = source_file_prefix + std::to_string(i + 1) + SOURCE_FILE_TYPE;
         std::string source_filename = source_dir + current_filename;
         std::string destination_filename = destination_dir + current_filename;
         
@@ -161,8 +206,8 @@ int main(int argc, char* argv[]){
             default:
                 status = "NOT_COPIED";
         }
-        std::cout << "Thread " << i << " " << status << ": " 
-        << SOURCE_FILE_PREFIX << i + 1 << SOURCE_FILE_TYPE 
+        std::cout << "Thread " << (i + 1) << " " << status << ": " 
+        << source_file_prefix << i + 1 << SOURCE_FILE_TYPE 
         << " from " << thread_args[i].source_filename << " to " 
         << thread_args[i].destination_filename << std::endl;
     }
