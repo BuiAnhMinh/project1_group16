@@ -40,7 +40,7 @@ std::string determine_filename(const std::string& source_dir){
     if (directory_ptr) {
         while ((directory_entry = readdir(directory_ptr)) != NULL) {
             std::string found_filename = directory_entry->d_name;
-            if (found_filename[0] != CURRENT_DIR && found_filename != PARENT_DIR){
+            if (found_filename[0] != CURRENT_DIR && found_filename != PARENT_DIR && found_filename != ""){
                 try {
                     // remove source file type component
                     std::regex txt_regex(SOURCE_FILE_TYPE);
