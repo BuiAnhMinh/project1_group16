@@ -141,7 +141,7 @@ int main(int argc, char* argv[]){
         int ret = pthread_join(threads[i], NULL);
         if (ret != 0) {
             std::cerr << "Failed to terminate thread " << i << ": " << ret << std::endl;
-            continue;
+            exit(1);
         }
         
         std::string status;
