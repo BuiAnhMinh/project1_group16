@@ -140,35 +140,35 @@ void *writer_thread(void *arg) {
 int main(int argc, char *argv[]) {
     // Arg Logic
     // Checking if there are enough arguments
-    if (argc != 4) {
-        fprintf(stderr, "Usage: %s n source_file destination_file\n", argv[0]);
-        exit(1);
-    }
+    if (argc != 4) { fprintf(stderr, "Usage: %s n source_file destination_file\n", argv[0]); exit(1); }
+
     // Checking if the number of threads is between 2 and 10
     int n = atoi(argv[1]);
-    if (n < 2 || n > 10) {
-        fprintf(stderr, "n must be between 2 and 10\n");
-        exit(1);
-    }
+    if (n < 2 || n > 10) { fprintf(stderr, "n must be between 2 and 10\n"); exit(1); }
+
     //  Checking to see if the source file exists
     src = fopen(argv[2], "r");
-    if (!src) {
-        perror("Error opening source file");
-        exit(1);
-    }
+    if (!src) { perror("Error opening source file"); exit(1); }
+
     // Checking output file
     dst = fopen(argv[3], "w");
-    if (!dst) {
-        perror("Error opening destination file");
-        fclose(src);
-        exit(1);
-    }
+    if (!dst) { perror("Error opening destination file"); fclose(src); exit(1); }
 
-    pthread_mutex_init(&file_mutex, NULL);
-    pthread_mutex_init(&write_mutex, NULL);
-    pthread_mutex_init(&queue_mutex, NULL);
-    pthread_cond_init(&not_full, NULL);
-    pthread_cond_init(&not_empty, NULL);
+    // Initialise mutexes and condition variables, collect all returned values to assess errors
+    int ret;
+    ret = pthread_mutex_init(&file_mutex, NULL);
+    if (ret != 0) { fprintf(stderr, "Error initialising file mutex: %s\n", strerror(ret)); exit(1); }
+    ret = pthread_mutex_init(&write_mutex, NULL);
+    if (ret != 0) { fprintf(stderr, "Error initialising write mutex: %s\n", strerror(ret)); exit(1); }
+    ret = pthread_mutex_init(&queue_mutex, NULL);
+    if (ret != 0) { fprintf(stderr, "Error initialising queue mutex: %s\n", strerror(ret)); exit(1); }
+    ret = pthread_mutex_init(&order_mutex, NULL);
+    if (ret != 0) { fprintf(stderr, "Error initialising order mutex: %s\n", strerror(ret)); exit(1); }
+    ret = pthread_cond_init(&not_full, NULL);
+    if (ret != 0) { fprintf(stderr, "Error initialising not full condition variable: %s\n", strerror(ret)); exit(1); }
+    ret = pthread_cond_init(&not_empty, NULL);
+    if (ret != 0) { fprintf(stderr, "Error initialising not empty condition variable: %s\n", strerror(ret)); exit(1); }
+    if (ret != 0) { fprintf(stderr, "Error initialising can write condition variable: %s\n", strerror(ret)); exit(1); }
 
     active_readers = n;
     writers_total = n;
@@ -178,28 +178,41 @@ int main(int argc, char *argv[]) {
 
     // Create threads
     for (int i = 0; i < n; i++) {
-        pthread_create(&readers[i], NULL, reader_thread, NULL);
-        pthread_create(&writers[i], NULL, writer_thread, NULL);
+        int ret = pthread_create(&readers[i], NULL, reader_thread, NULL);
+        if (ret != 0) { fprintf(stderr, "Error creating reader %d: %d\n", i, ret); exit(1); }
+        ret = pthread_create(&writers[i], NULL, writer_thread, NULL);
+        if (ret != 0) { fprintf(stderr, "Error creating writer %d: %d\n", i, ret); exit(1); }
     }
 
     // Join reader threads
     for (int i = 0; i < n; i++) {
-        pthread_join(readers[i], NULL);
+        int ret = pthread_join(readers[i], NULL);
+        if (ret != 0) { fprintf(stderr, "Failed to join reader %d: %d\n", i, ret); }
     }
 
     // Join writer threads
     for (int i = 0; i < n; i++) {
-        pthread_join(writers[i], NULL);
+        int ret = pthread_join(writers[i], NULL);
+        if (ret != 0) { fprintf(stderr, "Failed to join writer %d: %d\n", i, ret); }
     }
+    
+    // Cleanup mutexes and condition variables
+    ret = pthread_mutex_destroy(&file_mutex);
+    if (ret != 0) { fprintf(stderr, "Error destroying file mutex: %s\n", strerror(ret)); }
+    ret = pthread_mutex_destroy(&write_mutex);
+    if (ret != 0) { fprintf(stderr, "Error destroying write mutex: %s\n", strerror(ret)); }
+    ret = pthread_mutex_destroy(&queue_mutex);
+    if (ret != 0) { fprintf(stderr, "Error destroying queue mutex: %s\n", strerror(ret)); }
+    ret = pthread_mutex_destroy(&order_mutex);
+    if (ret != 0) { fprintf(stderr, "Error destroying order mutex: %s\n", strerror(ret)); }
+    ret = pthread_cond_destroy(&not_full);
+    if (ret != 0) { fprintf(stderr, "Error destroying not full condition variable: %s\n", strerror(ret)); }
+    ret = pthread_cond_destroy(&not_empty);
+    if (ret != 0) { fprintf(stderr, "Error destroying not empty condition variable: %s\n", strerror(ret)); }
+    ret = pthread_cond_destroy(&can_write);
+    if (ret != 0) { fprintf(stderr, "Error destroying can write condition variable: %s\n", strerror(ret)); }
 
-    // Note: Writers will spin forever in Subtask 1
-    // (In Subtask 2/3 we’ll add proper signaling to stop them)
-    pthread_mutex_destroy(&file_mutex);
-    pthread_mutex_destroy(&write_mutex);
-    pthread_mutex_destroy(&queue_mutex);
-    pthread_cond_destroy(&not_full);
-    pthread_cond_destroy(&not_empty);
-
+    // Close files
     fclose(src);
     fclose(dst);
     return 0;
