@@ -162,8 +162,6 @@ int main(int argc, char *argv[]) {
     if (ret != 0) { fprintf(stderr, "Error initialising write mutex: %s\n", strerror(ret)); exit(1); }
     ret = pthread_mutex_init(&queue_mutex, NULL);
     if (ret != 0) { fprintf(stderr, "Error initialising queue mutex: %s\n", strerror(ret)); exit(1); }
-    ret = pthread_mutex_init(&order_mutex, NULL);
-    if (ret != 0) { fprintf(stderr, "Error initialising order mutex: %s\n", strerror(ret)); exit(1); }
     ret = pthread_cond_init(&not_full, NULL);
     if (ret != 0) { fprintf(stderr, "Error initialising not full condition variable: %s\n", strerror(ret)); exit(1); }
     ret = pthread_cond_init(&not_empty, NULL);
@@ -203,14 +201,10 @@ int main(int argc, char *argv[]) {
     if (ret != 0) { fprintf(stderr, "Error destroying write mutex: %s\n", strerror(ret)); }
     ret = pthread_mutex_destroy(&queue_mutex);
     if (ret != 0) { fprintf(stderr, "Error destroying queue mutex: %s\n", strerror(ret)); }
-    ret = pthread_mutex_destroy(&order_mutex);
-    if (ret != 0) { fprintf(stderr, "Error destroying order mutex: %s\n", strerror(ret)); }
     ret = pthread_cond_destroy(&not_full);
     if (ret != 0) { fprintf(stderr, "Error destroying not full condition variable: %s\n", strerror(ret)); }
     ret = pthread_cond_destroy(&not_empty);
     if (ret != 0) { fprintf(stderr, "Error destroying not empty condition variable: %s\n", strerror(ret)); }
-    ret = pthread_cond_destroy(&can_write);
-    if (ret != 0) { fprintf(stderr, "Error destroying can write condition variable: %s\n", strerror(ret)); }
 
     // Close files
     fclose(src);
