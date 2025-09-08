@@ -30,9 +30,10 @@ struct directory_pair_t {
     copy_result_t result;
 };
 
-// parse a valid filename in directory to determine files to copy
-// assumes source only contains files matching the format required
-// assumes ".txt" file contains only letters before the file number
+// assumes source only contains files to be copied of type .txt
+// immediately remove ".txt"
+// pop the back of string until numbers arent present
+// this forms the base that is copied in form {base_filename}{[1, n]}.txt
 std::string determine_filename(const std::string& source_dir){
     DIR *directory_ptr;
     struct dirent *directory_entry;
@@ -46,7 +47,7 @@ std::string determine_filename(const std::string& source_dir){
                     size_t period_idx = found_filename.find(PERIOD);
                     if (period_idx != std::string::npos) {
                         std::string filename_no_type = found_filename.substr(0, period_idx);
-                        // trim numbers from the end
+                        // remove numbers until letter is found 
                         while (!filename_no_type.empty() && 
                             std::isdigit(static_cast<unsigned char>(filename_no_type.back()))) {
                             filename_no_type.pop_back();
