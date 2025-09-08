@@ -44,7 +44,7 @@ std::string determine_filename(const std::string& source_dir){
                 try {
                     // remove source file type component
                     std::regex txt_regex(SOURCE_FILE_TYPE);
-                    found_filename = std::regex_replace(found_filename, txt_regex, "");
+                    found_filename = std::regex_replace(found_filename, txt_regex, std::string(""));
                     std::string filename = "";
 
                     // filter for only letters
