@@ -139,7 +139,6 @@ int main(int argc, char *argv[]) {
     if (ret != 0) { fprintf(stderr, "Error initialising not full condition variable: %s\n", strerror(ret)); exit(1); }
     ret = pthread_cond_init(&not_empty, NULL);
     if (ret != 0) { fprintf(stderr, "Error initialising not empty condition variable: %s\n", strerror(ret)); exit(1); }
-    if (ret != 0) { fprintf(stderr, "Error initialising can write condition variable: %s\n", strerror(ret)); exit(1); }
 
     active_readers = n;
     writers_total = n;

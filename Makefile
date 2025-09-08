@@ -1,4 +1,4 @@
-# Compilers
+# Compiler
 CXX     := g++
 
 # Flags
@@ -20,10 +20,7 @@ mmcopier: $(MMCOPIER_OBJS)
 mscopier: $(MSCOPIER_OBJS)
 	$(CXX) -o $@ $^ $(LDLIBS)
 
-# Compile rules (handle both C and C++)
-%.o: %.c
-	$(CC) $(CFLAGS) -c $< -o $@
-
+# Compile rules (C++ only)
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 

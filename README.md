@@ -1,44 +1,106 @@
 # project1_group16
 
-# Multithreaded File Copier – Subtask 1
+## **Worklog** 
+- **Task 1:** @Spudgee
+- **Task 2:**
+    - **Subtask 1:** @KevinChen2211
+    - **Subtask 2:** @SatisfyingCrunch
+    - **Subtask 3:** @BuiAnhMinh
 
-## Overview
+All team members collaborated on the following:
+- Initial approach planning 
+- Error-handling 
+- Fixing bugs
+- Refining approach/cleaning code
+- Confirming final code adhered to the spec requirements
+- Testing compilation on RMIT servers (tested on Titan, Jupiter, Saturn)
+
+---
+
+## **
+
+---
+
+## **Generate input file**
+
+```bash
+chmod +x generate_text.sh
+./generate_text.sh 30 > input.txt
+```
+This creates a text file `input.txt` with 30 random lines from `task1/wordlist.10000`
+
+---
+
+## **Compilation**
+
+### Build All Files
+```bash
+    make
+```
+or
+```bash
+    make all
+```
+
+### Build Single File
+```bash
+make mmcopier
+make mscopier
+```
+
+### Clean Build Files
+```bash
+make clean
+```
+
+### Delete Existing Build and Rebuild
+```bash
+make clean && make
+```
+
+---
+
+## Usage
+
+## Multi-Threaded Multi-File Copying (Task 1)
+
+This program copies multiple files using multiple threads 
+
+- **Readers** read files concurrently with each thread responsible for reading a single file in source directory
+- **Witers** write files concurrently with each thread responsible for writing a single file to the destination directory
+
+### Run
+```bash
+    ./mmcopier n <source_dir> <destination_dir>
+```
+
+- `n` = number of reader/writer threads (2–10)
+- `<source_dir>`- input directory to copy files of format `source{n}.txt` where `n ∈ [1, n]`
+- `<destination_dir>` - output directory to copy files into (must already exist)
+
+## Multi-Threaded Single-File Copying (Task 2)
 
 This program copies a file using multiple threads:
 
 - **Readers** read lines from the source file and put them into a shared queue (max 20 lines).
 - **Writers** take lines from the queue and write them to the destination file.
 
-Subtask 1 only: no locks or condition variables yet → race conditions and unfinished writers may occur.
-
----
-
-## Usage
-
-1. **Generate input file**
+### Run 
 
 ```bash
-chmod +x generate_text.sh
-./generate_text.sh 30 > input.txt
+    ./mscopier n <input.txt> <output.txt>
 ```
 
-2. **Compile**
+- `n` = number of reader/writer threads (2–10)
+- `<input.txt>`- input file to read lines from
+- `<output.txt>` - output file to write lines into
 
-```bash
-    gcc -o mscopier mscopier.c -lpthread
-```
-
-2. **Run**
-
-```bash
-    ./mscopier n input.txt output.txt
-```
-
-- n = number of reader/writer threads (2–10)
-
-# Example
+## Example
 
 ```bash
 ./generate_text.sh 10 > input.txt
+
+./mcopier 6 task1/source_dir task2/dest_dir
+
 ./mscopier 3 input.txt output.txt
 ```
