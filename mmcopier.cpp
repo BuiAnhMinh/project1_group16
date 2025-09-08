@@ -33,7 +33,7 @@ struct directory_pair_t {
 // parse a valid filename in directory to determine files to copy
 // assumes source only contains files matching the format required
 // assumes ".txt" file contains only letters before the file number
-std::string determine_filenames(const std::string& source_dir){
+std::string determine_filename(const std::string& source_dir){
     DIR *directory_ptr;
     struct dirent *directory_entry;
     directory_ptr = opendir(source_dir.c_str());
