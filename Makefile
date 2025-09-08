@@ -2,7 +2,7 @@
 CXX     := g++
 
 # Flags
-CXXFLAGS := -std=c++17 -Wall -Werror -O2 -pthread
+CXXFLAGS := -std=c++11 -Wall -Werror -O2 -pthread
 LDLIBS   := -pthread
 
 # Targets
