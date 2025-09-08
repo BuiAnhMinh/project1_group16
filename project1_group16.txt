@@ -1,0 +1,14 @@
+## **Worklog** 
+- **Task 1:** @Spudgee
+- **Task 2:**
+    - **Subtask 1:** @KevinChen2211
+    - **Subtask 2:** @SatisfyingCrunch
+    - **Subtask 3:** @BuiAnhMinh
+
+All team members collaborated on the following:
+- Initial approach planning 
+- Error-handling 
+- Fixing bugs
+- Refining approach/cleaning code
+- Confirming final code adhered to the spec requirements
+- Testing compilation on RMIT servers (tested on Titan, Jupiter, Saturn)
