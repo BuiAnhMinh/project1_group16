@@ -71,19 +71,6 @@ char *dequeue() {
 
 // Reader thread
 void *reader_thread(void *arg) {
-    // char line[MAX_LINE];
-    // while (1) {
-    //     // Critical: read from source file
-    //     pthread_mutex_lock(&file_mutex);
-    //     if (fgets(line, sizeof(line), src) == NULL) {
-    //         // Add termination logic here
-    //         pthread_mutex_unlock(&file_mutex);
-    //         break; // End of file
-    //     }
-    //     enqueue(line);
-    //     pthread_mutex_unlock(&file_mutex);
-    // }
-    // return NULL;
     char line [MAX_LINE];
     for (;;){
         pthread_mutex_lock(&file_mutex);
@@ -102,28 +89,14 @@ void *reader_thread(void *arg) {
             }
             break;
         }
-        pthread_mutex_unlock(&file_mutex);
         enqueue(line);
-
+        pthread_mutex_unlock(&file_mutex);
     }
     return NULL;
 }
 
 // Writer thread
 void *writer_thread(void *arg) {
-    // pthread_mutex_lock(&write_mutex);
-    // while (1) {
-    //     char *line = dequeue();
-    //     if (line == NULL) {
-    //         // nothing in queue yet, just continue
-    //         continue;
-    //     }
-    //     fprintf(dst, "%s", line);
-    //     free(line);
-    // }
-    // pthread_mutex_unlock(&write_mutex);
-    // return NULL;
-
     for (;;){
         char *line = dequeue();
         if (line == NULL) {
